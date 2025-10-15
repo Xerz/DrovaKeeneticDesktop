@@ -54,7 +54,7 @@ class ProductInfo(BaseModel):
 async def get_latest_session(server_id: str, auth_token: str) -> SessionsEntity | None:
     async with aiohttp.ClientSession() as session:
         async with session.get(
-            URL_SESSIONS, data={"serveri_id": server_id}, headers={"X-Auth-Token": auth_token}
+            URL_SESSIONS, data={"server_id": server_id}, headers={"X-Auth-Token": auth_token}
         ) as resp:
             sessions = SessionsResponse(**await resp.json())
             if not sessions.sessions:
@@ -66,7 +66,7 @@ async def get_new_session(server_id: str, auth_token: str) -> SessionsEntity | N
     query_params = f"state={StatusEnum.NEW.value}&state={StatusEnum.HANDSHAKE.value}"
     async with aiohttp.ClientSession() as session:
         async with session.get(
-            URL_SESSIONS + query_params, data={"serveri_id": server_id}, headers={"X-Auth-Token": auth_token}
+            URL_SESSIONS + query_params, data={"server_id": server_id}, headers={"X-Auth-Token": auth_token}
         ) as resp:
             sessions = SessionsResponse(**await resp.json())
             if not sessions.sessions:
