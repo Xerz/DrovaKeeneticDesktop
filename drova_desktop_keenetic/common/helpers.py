@@ -96,7 +96,7 @@ class WaitFinishOrAbort(BaseDrovaMerchantWindows):
 
 
 class WaitNewDesktopSession(BaseDrovaMerchantWindows):
-    logger = logger.getChild("WaitNewSession")
+    logger = logger.getChild("WaitNewDesktopSession")
 
     async def run(self) -> bool:
         while True:
@@ -105,5 +105,10 @@ class WaitNewDesktopSession(BaseDrovaMerchantWindows):
             if not session:
                 return False
 
-            if session.status in (StatusEnum.HANDSHAKE, StatusEnum.NEW):
+            if session.status in (
+                StatusEnum.HANDSHAKE,
+                StatusEnum.NEW,
+                StatusEnum.ACTIVE,
+            ):
                 return await self.check_desktop_session(session)
+            await sleep(1)
