@@ -104,7 +104,7 @@ class UbisoftAuthDiscard(IPatch):
 class ParsecAuthDiscard(IPatch):
     logger = logger.getChild("ParsecAuthDiscard")
     NAME = "parsec"
-    TASKKILL_IMAGE = "parsecd.exe"
+    TASKKILL_IMAGE = "pservice.exe"
 
     to_remove = (
         r"AppData\Roaming\Parsec\user.bin"
