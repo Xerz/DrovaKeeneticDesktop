@@ -4,7 +4,7 @@ from asyncio import sleep
 
 from asyncssh import SSHClientConnection, SFTPNoSuchFile
 
-from drova_desktop_keenetic.common.commands import ShadowDefenderCLI, TaskKill
+from drova_desktop_keenetic.common.commands import ShadowDefenderCLI, TaskKill, PsExec
 from drova_desktop_keenetic.common.contants import (
     SHADOW_DEFENDER_DRIVES,
     SHADOW_DEFENDER_PASSWORD,
@@ -57,7 +57,7 @@ class BeforeConnect:
                 await sleep(1)
 
                 # Запускаем obs (через скомпилированный ahk-скрипт)
-                self.client.run(str(PsExec(command="str.exe")), check=False)
+                await self.client.run(str(PsExec(command="str.exe")), check=False)
 
         except Exception:
             logger.exception("We have problem")
