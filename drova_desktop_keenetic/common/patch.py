@@ -114,9 +114,9 @@ class ParsecAuthDiscard(IPatch):
 
     async def patch(self) -> None:
         await self.client.run(str(TaskKill(image="parsecd.exe")))
-        if await self.sftp.exists(auth_file):
-            self.logger.info(f"Remove file {auth_file}")
-            await self.sftp.remove(PureWindowsPath(auth_file))
+        if await self.sftp.exists(self.auth_file):
+            self.logger.info(f"Remove file {self.auth_file}")
+            await self.sftp.remove(PureWindowsPath(self.auth_file))
 
 
 class WargamingAuthDiscard(IPatch):
