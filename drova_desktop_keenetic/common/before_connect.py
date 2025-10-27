@@ -2,7 +2,7 @@ import logging
 import os
 from asyncio import sleep
 
-from asyncssh import SSHClientConnection
+from asyncssh import SSHClientConnection, SFTPNoSuchFile
 
 from drova_desktop_keenetic.common.commands import ShadowDefenderCLI, TaskKill
 from drova_desktop_keenetic.common.contants import (
@@ -41,11 +41,18 @@ class BeforeConnect:
 
                 for path in ALL_PATCHES:
                     self.logger.info(f"prepare {path.NAME}")
-                    if path.TASKKILL_IMAGE:
-                        await self.client.run(str(TaskKill(image=path.TASKKILL_IMAGE)))
-                    await sleep(0.2)
-                    pather = path(self.client, sftp)
-                    await pather.patch()
+                    try:
+                        if path.TASKKILL_IMAGE:
+                            await self.client.run(str(TaskKill(image=path.TASKKILL_IMAGE)))
+                        await sleep(0.2)
+                        pather = path(self.client, sftp)
+                        await pather.patch()
+
+                    except SFTPNoSuchFile as e:
+                        self.logger.warning(f"Файл не найден при применении патча {path.NAME}: {e}")
+
+                    except Exception as e:
+                        self.logger.exception(f"Ошибка при выполнении патча {path.NAME}: {e}")
 
         except Exception:
             logger.exception("We have problem")
