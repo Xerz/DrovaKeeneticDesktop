@@ -168,6 +168,7 @@ class PatchWindowsSettings(IPatch):
     )
 
     explorer_path = r"HKCU\Software\Microsoft\Windows\CurrentVersion\Policies\Explorer"
+    disallow_run_path = fr"{explorer_path}\DisallowRun"
     disable_poweroff = RegistryPatch(
         reg_directory=explorer_path, value_name="NoClose", value_type=RegValueType.REG_DWORD, value=1
     )
@@ -231,7 +232,7 @@ class PatchWindowsSettings(IPatch):
         for app_index in range(len(self.blocked_applications)):
             app = self.blocked_applications[app_index]
             yield RegistryPatch(
-                reg_directory=self.explorer_path, value_name=f"{app_index}", value_type=RegValueType.REG_SZ, value=app
+                reg_directory=self.disallow_run_path, value_name=f"{app_index}", value_type=RegValueType.REG_SZ, value=app
             )
 
     def _get_patches(self):
