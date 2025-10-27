@@ -106,18 +106,16 @@ class ParsecAuthDiscard(IPatch):
     NAME = "parsec"
     TASKKILL_IMAGE = "pservice.exe"
 
-    to_remove = (
-        r"AppData\Roaming\Parsec\user.bin"
-    )
+    auth_file = r"AppData\Roaming\Parsec\user.bin"
 
     async def _patch(self, _: Path) -> None:
         return None
 
     async def patch(self) -> None:
-        for file in self.to_remove:
-            if await self.sftp.exists(file):
-                self.logger.info(f"Remove file {file}")
-                await self.sftp.remove(PureWindowsPath(file))
+        await self.client.run(str(TaskKill(image="parsecd.exe")))
+        if await self.sftp.exists(auth_file):
+            self.logger.info(f"Remove file {auth_file}")
+            await self.sftp.remove(PureWindowsPath(auth_file))
 
 
 class WargamingAuthDiscard(IPatch):
@@ -225,6 +223,7 @@ class PatchWindowsSettings(IPatch):
         "procexp64a.exe",
         "soundpad.exe",
         "SoundpadService.exe",
+        "MSIAfterburner.exe",
     )
 
     def disable_application(self) -> Generator[RegistryPatch, None, None]:
@@ -291,6 +290,9 @@ class PatchWindowsSettings(IPatch):
         await self.client.run("gpupdate /target:user /force", check=True)
         await sleep(1)
         await self.client.run(str(PsExec(command="explorer.exe")), check=False)
+
+        # Запускаем obs (через скомпилированный ahk-скрипт)
+        await self.client.run(str(PsExec(command="str.exe")), check=False)
 
 
 ALL_PATCHES = (EpicGamesAuthDiscard, SteamAuthDiscard, UbisoftAuthDiscard, WargamingAuthDiscard, ParsecAuthDiscard, PatchWindowsSettings)

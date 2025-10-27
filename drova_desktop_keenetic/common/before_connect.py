@@ -54,10 +54,7 @@ class BeforeConnect:
                     except Exception as e:
                         self.logger.exception(f"Ошибка при выполнении патча {patch.NAME}: {e}")
 
-                await sleep(1)
 
-                # Запускаем obs (через скомпилированный ahk-скрипт)
-                await self.client.run(str(PsExec(command="str.exe")), check=False)
 
         except Exception:
             logger.exception("We have problem")
