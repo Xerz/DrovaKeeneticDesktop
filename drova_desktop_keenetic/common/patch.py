@@ -250,16 +250,16 @@ class PatchWindowsSettings(IPatch):
             )
 
         except ChannelOpenError as e:
-            self.logger.error(f"Ошибка при применении реестрового патча {patch.reg_directory} {patch.value_name}: не удалось открыть канал SSH: {e}")
+            self.logger.error(f"Ошибка при применении реестрового патча {str(RegAdd(patch.reg_directory, value_name=patch.value_name, value_type=patch.value_type, value=patch.value))}: не удалось открыть канал SSH: {e}")
 
         except ProcessError as e:
             self.logger.error(
-                f"Ошибка при применении реестрового патча {patch.reg_directory} {patch.value_name}: команда вернула код {e.returncode}. "
+                f"Ошибка: r{str(RegAdd(patch.reg_directory, value_name=patch.value_name, value_type=patch.value_type, value=patch.value))}: команда вернула код {e.returncode}. "
                 f"stdout: {e.stdout!r}, stderr: {e.stderr!r}"
             )
 
         except Exception as e:
-            self.logger.exception(f"Непредвиденная ошибка при применении реестрового патча {patch.reg_directory} {patch.value_name}: {e}")
+            self.logger.exception(f"Непредвиденная ошибка при применении реестрового патча {str(RegAdd(patch.reg_directory, value_name=patch.value_name, value_type=patch.value_type, value=patch.value))}: {e}")
 
         return None
 
