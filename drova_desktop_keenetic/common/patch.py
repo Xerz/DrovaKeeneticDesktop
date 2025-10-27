@@ -13,6 +13,7 @@ from drova_desktop_keenetic.common.commands import (
     PsExec,
     RegAdd,
     RegValueType,
+    TaskKill
 )
 
 logger = logging.getLogger(__name__)
