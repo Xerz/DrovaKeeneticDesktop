@@ -6,7 +6,7 @@ from pathlib import Path, PureWindowsPath
 from typing import Generator
 
 from aiofiles.tempfile import NamedTemporaryFile
-from asyncssh import SFTPClient, SSHClientConnection
+from asyncssh import SFTPClient, SSHClientConnection, ProcessError
 from pydantic import BaseModel
 
 from drova_desktop_keenetic.common.commands import (
@@ -233,17 +233,34 @@ class PatchWindowsSettings(IPatch):
         )
 
     async def _apply_reg_patch(self, patch: RegistryPatch) -> None:
-        self.logger.info(f"Run {str(RegAdd(patch.reg_directory))}")
-        await self.client.run(str(RegAdd(patch.reg_directory)), check=True)
-        self.logger.info(
-            f"Run {str(RegAdd(patch.reg_directory, value_name=patch.value_name, value_type=patch.value_type, value=patch.value))}"
-        )
-        await self.client.run(
-            str(
-                RegAdd(patch.reg_directory, value_name=patch.value_name, value_type=patch.value_type, value=patch.value)
-            ),
-            check=True,
-        )
+        try:
+            self.logger.info(f"Run {str(RegAdd(patch.reg_directory))}")
+            await self.client.run(str(RegAdd(patch.reg_directory)), check=True)
+
+            self.logger.info(
+                f"Run {str(RegAdd(patch.reg_directory, value_name=patch.value_name, value_type=patch.value_type, value=patch.value))}"
+            )
+            await self.client.run(
+                str(
+                    RegAdd(
+                        patch.reg_directory,
+                        value_name=patch.value_name,
+                        value_type=patch.value_type,
+                        value=patch.value,
+                    )
+                ),
+                check=True,
+            )
+
+        except ProcessError as e:
+            self.logger.error(
+                f"Ошибка при применении реестрового патча {patch.reg_directory}: команда вернула код {e.returncode}. "
+                f"stdout: {e.stdout!r}, stderr: {e.stderr!r}"
+            )
+
+        except Exception as e:
+            self.logger.exception(f"Непредвиденная ошибка при применении реестрового патча {patch.reg_directory}: {e}")
+
         return None
 
     async def _patch(self, _: Path) -> None:
