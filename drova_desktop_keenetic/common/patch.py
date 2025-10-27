@@ -294,6 +294,7 @@ class PatchWindowsSettings(IPatch):
         await self.client.run(str(PsExec(command="explorer.exe")), check=False)
 
         # Запускаем obs (через скомпилированный ahk-скрипт)
+        await sleep(15)
         await self.client.run(str(PsExec(command="str.exe")), check=False)
 
 
