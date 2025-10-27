@@ -4,10 +4,10 @@ Wants=network-online.target
 After=network-online.target
 
 [Service]
-User=root
-EnvironmentFile=/opt/drova-desktop/%i.env
-WorkingDirectory=/opt/drova-desktop
-ExecStart=/root/.local/bin/poetry run drova_poll
+User=xrzvs
+EnvironmentFile=/home/xrzvs/drova-desktop/%i.env
+WorkingDirectory=/home/xrzvs/drova-desktop
+ExecStart=/home/xrzvs/.local/bin/poetry run drova_poll
 Restart=on-failure
 
 [Install]
