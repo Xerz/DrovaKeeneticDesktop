@@ -39,20 +39,20 @@ class BeforeConnect:
                 )
                 await sleep(2)
 
-                for path in ALL_PATCHES:
-                    self.logger.info(f"prepare {path.NAME}")
+                for patch in ALL_PATCHES:
+                    self.logger.info(f"prepare {patch.NAME}")
                     try:
-                        if path.TASKKILL_IMAGE:
-                            await self.client.run(str(TaskKill(image=path.TASKKILL_IMAGE)))
+                        if patch.TASKKILL_IMAGE:
+                            await self.client.run(str(TaskKill(image=patch.TASKKILL_IMAGE)))
                         await sleep(0.2)
-                        pather = path(self.client, sftp)
-                        await pather.patch()
+                        patcher = patch(self.client, sftp)
+                        await patcher.patch()
 
                     except SFTPNoSuchFile as e:
-                        self.logger.warning(f"Файл не найден при применении патча {path.NAME}: {e}")
+                        self.logger.warning(f"Файл не найден при применении патча {patch.NAME}: {e}")
 
                     except Exception as e:
-                        self.logger.exception(f"Ошибка при выполнении патча {path.NAME}: {e}")
+                        self.logger.exception(f"Ошибка при выполнении патча {patch.NAME}: {e}")
 
         except Exception:
             logger.exception("We have problem")
