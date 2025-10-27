@@ -234,9 +234,6 @@ class PatchWindowsSettings(IPatch):
 
     async def _apply_reg_patch(self, patch: RegistryPatch) -> None:
         try:
-            self.logger.info(
-                f"Run {str(RegAdd(patch.reg_directory, value_name=patch.value_name, value_type=patch.value_type, value=patch.value))}"
-            )
             await self.client.run(
                 str(
                     RegAdd(
@@ -248,13 +245,16 @@ class PatchWindowsSettings(IPatch):
                 ),
                 check=True,
             )
+            self.logger.info(
+                f"Успешно: run {str(RegAdd(patch.reg_directory, value_name=patch.value_name, value_type=patch.value_type, value=patch.value))}"
+            )
 
         except ChannelOpenError as e:
-            self.logger.error(f"Ошибка при применении реестрового патча {patch.reg_directory}: не удалось открыть канал SSH: {e}")
+            self.logger.error(f"Ошибка при применении реестрового патча {patch.reg_directory} {patch.value_name}: не удалось открыть канал SSH: {e}")
 
         except ProcessError as e:
             self.logger.error(
-                f"Ошибка при применении реестрового патча {patch.reg_directory}: команда вернула код {e.returncode}. "
+                f"Ошибка при применении реестрового патча {patch.reg_directory} {patch.value_name}: команда вернула код {e.returncode}. "
                 f"stdout: {e.stdout!r}, stderr: {e.stderr!r}"
             )
 
