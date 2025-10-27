@@ -101,6 +101,24 @@ class UbisoftAuthDiscard(IPatch):
                 self.logger.info(f"Remove file {file}")
                 await self.sftp.remove(PureWindowsPath(file))
 
+class ParsecAuthDiscard(IPatch):
+    logger = logger.getChild("ParsecAuthDiscard")
+    NAME = "parsec"
+    TASKKILL_IMAGE = "parsecd.exe"
+
+    to_remove = (
+        r"AppData\Roaming\Parsec\user.bin"
+    )
+
+    async def _patch(self, _: Path) -> None:
+        return None
+
+    async def patch(self) -> None:
+        for file in self.to_remove:
+            if await self.sftp.exists(file):
+                self.logger.info(f"Remove file {file}")
+                await self.sftp.remove(PureWindowsPath(file))
+
 
 class WargamingAuthDiscard(IPatch):
     logger = logger.getChild("WargamingAuthDiscard")
@@ -275,4 +293,4 @@ class PatchWindowsSettings(IPatch):
         await self.client.run(str(PsExec(command="explorer.exe")), check=False)
 
 
-ALL_PATCHES = (EpicGamesAuthDiscard, SteamAuthDiscard, UbisoftAuthDiscard, WargamingAuthDiscard, PatchWindowsSettings)
+ALL_PATCHES = (EpicGamesAuthDiscard, SteamAuthDiscard, UbisoftAuthDiscard, WargamingAuthDiscard, ParsecAuthDiscard, PatchWindowsSettings)
