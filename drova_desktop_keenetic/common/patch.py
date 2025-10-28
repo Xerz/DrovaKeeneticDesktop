@@ -6,7 +6,7 @@ from pathlib import Path, PureWindowsPath
 from typing import Generator
 
 from aiofiles.tempfile import NamedTemporaryFile
-from asyncssh import SFTPClient, SSHClientConnection
+from asyncssh import SFTPClient, SSHClientConnection, ProcessError, ChannelOpenError
 from pydantic import BaseModel
 
 from drova_desktop_keenetic.common.commands import (
@@ -151,6 +151,7 @@ class PatchWindowsSettings(IPatch):
     )
 
     explorer_path = r"HKCU\Software\Microsoft\Windows\CurrentVersion\Policies\Explorer"
+    disallow_run_path = fr"{explorer_path}\DisallowRun"
     disable_poweroff = RegistryPatch(
         reg_directory=explorer_path, value_name="NoClose", value_type=RegValueType.REG_DWORD, value=1
     )
@@ -213,7 +214,7 @@ class PatchWindowsSettings(IPatch):
         for app_index in range(len(self.blocked_applications)):
             app = self.blocked_applications[app_index]
             yield RegistryPatch(
-                reg_directory=self.explorer_path, value_name=f"{app_index}", value_type=RegValueType.REG_SZ, value=app
+                reg_directory=self.disallow_run_path, value_name=f"{app_index}", value_type=RegValueType.REG_SZ, value=app
             )
 
     def _get_patches(self):
@@ -233,17 +234,34 @@ class PatchWindowsSettings(IPatch):
         )
 
     async def _apply_reg_patch(self, patch: RegistryPatch) -> None:
-        self.logger.info(f"Run {str(RegAdd(patch.reg_directory))}")
-        await self.client.run(str(RegAdd(patch.reg_directory)), check=True)
-        self.logger.info(
-            f"Run {str(RegAdd(patch.reg_directory, value_name=patch.value_name, value_type=patch.value_type, value=patch.value))}"
-        )
-        await self.client.run(
-            str(
-                RegAdd(patch.reg_directory, value_name=patch.value_name, value_type=patch.value_type, value=patch.value)
-            ),
-            check=True,
-        )
+        try:
+            await self.client.run(
+                str(
+                    RegAdd(
+                        patch.reg_directory,
+                        value_name=patch.value_name,
+                        value_type=patch.value_type,
+                        value=patch.value,
+                    )
+                ),
+                check=True,
+            )
+            self.logger.info(
+                f"Успешно: run {str(RegAdd(patch.reg_directory, value_name=patch.value_name, value_type=patch.value_type, value=patch.value))}"
+            )
+
+        except ChannelOpenError as e:
+            self.logger.error(f"Ошибка при применении реестрового патча {str(RegAdd(patch.reg_directory, value_name=patch.value_name, value_type=patch.value_type, value=patch.value))}: не удалось открыть канал SSH: {e}")
+
+        except ProcessError as e:
+            self.logger.error(
+                f"Ошибка: r{str(RegAdd(patch.reg_directory, value_name=patch.value_name, value_type=patch.value_type, value=patch.value))}: команда вернула код {e.returncode}. "
+                f"stdout: {e.stdout!r}, stderr: {e.stderr!r}"
+            )
+
+        except Exception as e:
+            self.logger.exception(f"Непредвиденная ошибка при применении реестрового патча {str(RegAdd(patch.reg_directory, value_name=patch.value_name, value_type=patch.value_type, value=patch.value))}: {e}")
+
         return None
 
     async def _patch(self, _: Path) -> None:
