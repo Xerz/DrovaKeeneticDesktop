@@ -1,5 +1,5 @@
 import os
-from logging import DEBUG, INFO, StreamHandler, basicConfig
+from logging import DEBUG, INFO, ERROR, StreamHandler, basicConfig
 from logging.handlers import RotatingFileHandler
 
 from drova_desktop_keenetic.common.contants import WINDOWS_HOST
