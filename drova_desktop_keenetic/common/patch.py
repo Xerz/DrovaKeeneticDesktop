@@ -59,9 +59,9 @@ class OldEpicGamesAuthDiscard(IPatch):
             config.write(f)
             
 
-class OldEpicGamesAuthDiscard(IPatch):
-    logger = logger.getChild("OldEpicGamesAuthDiscard")
-    NAME = "oldepicgames"
+class NewEpicGamesAuthDiscard(IPatch):
+    logger = logger.getChild("NewEpicGamesAuthDiscard")
+    NAME = "newepicgames"
     TASKKILL_IMAGE = "EpicGamesLauncher.exe"
 
     remote_file_location = PureWindowsPath(r"AppData\Local\EpicGamesLauncher\Saved\Config\WindowsEditor\GameUserSettings.ini")
