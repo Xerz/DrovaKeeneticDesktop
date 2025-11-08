@@ -40,9 +40,9 @@ class IPatch(ABC):
             await self.sftp.put(str(temp_file.name), str(self.remote_file_location))
 
 
-class NewEpicGamesAuthDiscard(IPatch):
-    logger = logger.getChild("EpicGamesAuthDiscard")
-    NAME = "epicgames"
+class OldEpicGamesAuthDiscard(IPatch):
+    logger = logger.getChild("OldEpicGamesAuthDiscard")
+    NAME = "oldepicgames"
     TASKKILL_IMAGE = "EpicGamesLauncher.exe"
 
     remote_file_location = PureWindowsPath(r"AppData\Local\EpicGamesLauncher\Saved\Config\Windows\GameUserSettings.ini")
@@ -59,23 +59,12 @@ class NewEpicGamesAuthDiscard(IPatch):
             config.write(f)
             
 
-class OldEpicGamesAuthDiscard(IPatch):
-    logger = logger.getChild("EpicGamesAuthDiscard")
-    NAME = "epicgames"
+class NewEpicGamesAuthDiscard(OldEpicGamesAuthDiscard):
+    logger = logger.getChild("NewEpicGamesAuthDiscard")
+    NAME = "newepicgames"
     TASKKILL_IMAGE = "EpicGamesLauncher.exe"
 
     remote_file_location = PureWindowsPath(r"AppData\Local\EpicGamesLauncher\Saved\Config\WindowsEditor\GameUserSettings.ini")
-
-    async def _patch(self, file: Path) -> None:
-        config = ConfigParser(strict=False)
-        self.logger.info("read GameUserSettings.ini")
-        config.read(file, encoding="UTF-8")
-
-        config.remove_section("RememberMe")
-        config.remove_section("Offline")
-        self.logger.info("Write without auth section")
-        with open(file, "w") as f:
-            config.write(f)
 
 
 class SteamAuthDiscard(IPatch):

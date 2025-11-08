@@ -13,4 +13,4 @@ ch = StreamHandler()
 handler_rotating = RotatingFileHandler(f"app.{os.environ[WINDOWS_HOST]}.log", maxBytes=1024 * 1024, backupCount=5)
 
 
-basicConfig(level=INFO, handlers=(handler_rotating, ch), format=log_format, datefmt=date_format)
+basicConfig(level=ERROR, handlers=(handler_rotating, ch), format=log_format, datefmt=date_format)
