@@ -40,12 +40,31 @@ class IPatch(ABC):
             await self.sftp.put(str(temp_file.name), str(self.remote_file_location))
 
 
-class EpicGamesAuthDiscard(IPatch):
+class NewEpicGamesAuthDiscard(IPatch):
     logger = logger.getChild("EpicGamesAuthDiscard")
     NAME = "epicgames"
     TASKKILL_IMAGE = "EpicGamesLauncher.exe"
 
     remote_file_location = PureWindowsPath(r"AppData\Local\EpicGamesLauncher\Saved\Config\Windows\GameUserSettings.ini")
+
+    async def _patch(self, file: Path) -> None:
+        config = ConfigParser(strict=False)
+        self.logger.info("read GameUserSettings.ini")
+        config.read(file, encoding="UTF-8")
+
+        config.remove_section("RememberMe")
+        config.remove_section("Offline")
+        self.logger.info("Write without auth section")
+        with open(file, "w") as f:
+            config.write(f)
+            
+
+class OldEpicGamesAuthDiscard(IPatch):
+    logger = logger.getChild("EpicGamesAuthDiscard")
+    NAME = "epicgames"
+    TASKKILL_IMAGE = "EpicGamesLauncher.exe"
+
+    remote_file_location = PureWindowsPath(r"AppData\Local\EpicGamesLauncher\Saved\Config\WindowsEditor\GameUserSettings.ini")
 
     async def _patch(self, file: Path) -> None:
         config = ConfigParser(strict=False)
@@ -298,4 +317,4 @@ class PatchWindowsSettings(IPatch):
         await self.client.run(str(PsExec(command="str.exe")), check=False)
 
 
-ALL_PATCHES = (EpicGamesAuthDiscard, SteamAuthDiscard, UbisoftAuthDiscard, WargamingAuthDiscard, ParsecAuthDiscard, PatchWindowsSettings)
+ALL_PATCHES = (OldEpicGamesAuthDiscard, NewEpicGamesAuthDiscard, SteamAuthDiscard, UbisoftAuthDiscard, WargamingAuthDiscard, ParsecAuthDiscard, PatchWindowsSettings)
