@@ -6,16 +6,16 @@
 Сохраните скрипт в `C:\ProgramData\DrovaPatch\Apply-DrovaPatch.ps1` (папку создать заранее).
 
 ```powershell
-$ErrorActionPreference = "Stop"
+$ErrorActionPreference = "SilentlyContinue"
 
 $processes = @(
-    "EpicGamesLauncher.exe",
-    "steam.exe",
-    "upc.exe",
-    "pservice.exe",
-    "parsecd.exe",
-    "wgc.exe",
-    "explorer.exe"
+    "EpicGamesLauncher",
+    "steam",
+    "upc",
+    "pservice",
+    "parsecd",
+    "wgc",
+    "explorer"
 )
 
 $filesToRemove = @(
@@ -93,16 +93,33 @@ Start-Process -FilePath "$env:WINDIR\explorer.exe"
 mkdir C:\ProgramData\DrovaPatch
 copy Apply-DrovaPatch.ps1 C:\ProgramData\DrovaPatch\
 
-schtasks /Create \
-  /TN "Drova Apply Patches" \
-  /TR "powershell.exe -ExecutionPolicy Bypass -File C:\\ProgramData\\DrovaPatch\\Apply-DrovaPatch.ps1" \
-  /SC ONLOGON \
-  /RU SYSTEM \
-  /RL HIGHEST \
+schtasks /Create ^
+  /TN "Drova Apply Patches" ^
+  /TR "powershell.exe -ExecutionPolicy Bypass -File C:\ProgramData\DrovaPatch\Apply-DrovaPatch.ps1" ^
+  /SC ONEVENT ^
+  /EC Application ^
+  /MO "*[System[Provider[@Name='esme'] and EventID=2001]]" ^
+  /RU "%USERNAME%" ^
+  /RL HIGHEST ^
   /F
 ```
 
-Такую задачу можно запускать вручную:
+
+
+Задача на перезагрузку после окончания сессии — лучше из телеги и добавить два одинаковых триггера, а не вот эти вот "сложные" фильтры
+```cmd
+schtasks /Create ^
+  /TN "Drova Reboot On Esme Events" ^
+  /TR "shutdown.exe /r /t 0 /f" ^
+  /SC ONEVENT ^
+  /EC Application ^
+  /MO "*[System[Provider[@Name='esme'] and (EventID=2003 or EventID=2004)]]" ^
+  /RU SYSTEM ^
+  /RL HIGHEST ^
+  /F
+```
+
+Ручной запуск для проверки:
 ```cmd
 schtasks /Run /TN "Drova Apply Patches"
 ```
